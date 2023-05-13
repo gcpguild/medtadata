@@ -39,21 +39,35 @@ spark = SparkSession.builder \
     .config("spark.executor.memory", "20g") \
     .getOrCreate()
 
-# Define file paths
-df1_job_master_lst = "job_master_data.csv"
-df2_job_column_lst = "jobs_cloumn_list.csv"
-df3_job_linked_lst = "linked_job_name_data.csv"
+# Define the file paths
+file_paths = [
+    "job_master_metadata.csv",
+    "job_column_metadata.csv",
+    "job_link_metadata.csv"
+]
 
-# Read CSV files as dataframes
-df1 = spark.read.format("csv").option("header", "true").load(df1_job_master_lst)
-df2 = spark.read.format("csv").option("header", "true").load(df2_job_column_lst)
-df3 = spark.read.format("csv").option("header", "true").load(df3_job_linked_lst)
+# Create Spark session
+spark = SparkSession.builder \
+    .appName("Read Metadata Data") \
+    .getOrCreate()
+
+        
+# Read CSV files as DataFrames
+dfs = []
+for file_path in file_paths:
+    df = spark.read.format("csv").option("header", "true").load(file_path)
+    dfs.append(df)
+
+# Access the individual DataFrames
+df1_job_master_lst = dfs[0]
+df2_job_column_lst = dfs[1]
+df3_job_linked_lst = dfs[2]
 
 # Join dataframes
-df_merged = df1.join(df2, "job_name", "left").join(df3, "job_name", "left")
+df_merged = df1_job_master_lst.join(df2_job_column_lst, "job_name", "left").join(df3_job_linked_lst, "job_name", "left")
 
 # Select columns of interest
-selected_columns = ['job_name', 'is_transformation', 'where_filter_apply', 'column_name', 'job_link_name', 'load_date', 'partition_id']0 
+selected_columns = ['job_name', 'is_transformation', 'where_filter_apply', 'column_name', 'job_link_name', 'load_date', 'partition_id'] 
 
 df_selected = df_merged.select(*selected_columns)
 
@@ -68,3 +82,4 @@ df_pd.to_csv("metadata_cdsc.csv", index=False)
 
 # Stop the Spark session
 spark.stop()
+
