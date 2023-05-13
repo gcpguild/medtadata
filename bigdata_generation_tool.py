@@ -3,24 +3,6 @@
 """
 Bigdata framework for generation of metadata in Cloudera into AWS, Azure, GCP and other clound platform.
 Date : May 12, 2023
-Script: bigdata_generation_tool.py
-Description: A tool for generating big data metadata.
-Script: bigdata_generation_tool.py
-Description: A tool for generating big data metadata.
-
-Instructions:
-1. Place the input CSV files in the same directory as this script.
-   - Ensure that the input CSV files are named as follows:
-     - job_master_data.csv
-     - jobs_column_list.csv
-     - linked_job_name_data.csv
-
-2. Run this script using the Python interpreter.
-
-3. After execution, the generated metadata will be saved in the following files:
-   - job_master_metadata.csv
-   - job_column_metadata.csv
-   - job_link_metadata.csv
 """
 _author__ = "Ramamurthy Valavandan"
 __copyright__ = "Copyright (c) 2023 Nature Labs, Namakkal. All Rights Reserved."
@@ -71,7 +53,7 @@ df3 = spark.read.format("csv").option("header", "true").load(df3_job_linked_lst)
 df_merged = df1.join(df2, "job_name", "left").join(df3, "job_name", "left")
 
 # Select columns of interest
-selected_columns = ['job_name', 'is_active', 'is_transformation', 'where_clause_filter_apply', 'column_name',  'column_datatype', 'linked_job_name', 'load_date']
+selected_columns = ['job_name', 'is_transformation', 'where_filter_apply', 'column_name', 'job_link_name', 'load_date', 'partition_id']0 
 
 df_selected = df_merged.select(*selected_columns)
 
